@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<workspace>
+	<settings>
+		<label>Graphics3D</label>
+	</settings>
+	<users>
+		<user>
+			<path>Graphics3D.jcu</path>
+		</user>
+	</users>
+	<projects>
+		<project>
+			<path>Graphics3D.jcp</path>
+		</project>
+	</projects>
+</workspace>
