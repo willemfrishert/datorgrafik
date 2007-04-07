@@ -202,7 +202,6 @@ public class Matrix4
     Vector3 vout = new Vector3();
     // Calculate x,y,z values of vout here
     
-        // Calculate x,y,z,w values of vout here
     vout.x = (a11*v.x) + (a12*v.y) + (a13*v.z);
     vout.y = (a21*v.x) + (a22*v.y) + (a23*v.z);
     vout.z = (a31*v.x) + (a32*v.y) + (a33*v.z);
