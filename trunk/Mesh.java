@@ -80,7 +80,7 @@ public class Mesh {
 	  
 	  for (int i=0; i < faceColors.length; i++)
 	  {
-		  faceColors[i] = new ColorRGB(Math.random()*0.25,Math.random()*0.25,Math.random()*0.25);
+		  faceColors[i] = new ColorRGB(Math.random(),Math.random(),Math.random());
 	  }
   }
 
@@ -199,9 +199,9 @@ public class Mesh {
     	
     	double angle = Vector3.dot(normal, lightsource.direction);
 
-    	double r = faceColors[i].r + lightsource.color.r*angle;
-    	double g = faceColors[i].g + lightsource.color.g*angle;
-    	double b = faceColors[i].b + lightsource.color.b*angle;
+    	double r = faceColors[i].r * lightsource.color.r * angle;
+    	double g = faceColors[i].g * lightsource.color.g * angle;
+    	double b = faceColors[i].b * lightsource.color.b * angle;
     	
     	lighting[i] = new ColorRGB( r, g, b);
     }
