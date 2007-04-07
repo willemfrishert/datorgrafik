@@ -36,6 +36,10 @@ public class Vector3 {
   * Normalize the vector to unit length
   */
   public void normalize() {
+	  double length = Math.sqrt(x*x+y*y+z*z);
+	  x /= length;
+	  y /= length;
+	  z /= length;
     // Normalize x, y, z to set vector to unit length
   }
 
@@ -56,7 +60,11 @@ public class Vector3 {
   */
   public static Vector3 cross(Vector3 v1, Vector3 v2) {
   	Vector3 v3 = new Vector3();
+  	
     // Create the cross product here
+    v3.x = v1.y*v2.z - v1.z*v2.y;
+    v3.y = v1.z*v2.x - v1.x*v2.z;
+    v3.z = v1.x*v2.y - v1.y*v2.x;
     
     return v3;
   }
@@ -77,8 +85,11 @@ public class Vector3 {
   * @return The dot product value
   */
   public static double dot(Vector3 v1, Vector3 v2) {
+	  
     // Create the dot product here
-    return 0.0;
+	double dotProduct = v1.x*v2.x+v1.y*v2.y+v1.z+v2.z;  
+	  
+    return dotProduct;
   }
 
 }

@@ -22,12 +22,27 @@ class Graphics3DPanel extends JPanel implements Runnable {
 
 	/* Class-wide variable for easy access to the scene data */
 	private Mesh m;
+	
+	private Light lightSources[] = new Light[2];
+	private Vector3 lightDir0;
+	private Vector3 lightDir1;
 
 	/* Constructor: Initialize important stuff */
 	public Graphics3DPanel() {
   		super(); // Run the parent constructor for JPanel
     	// Create a Mesh to use in the paintComponent() method
     	m = new Icosahedron();
+    	m.calculateFaceColors();
+    	
+    	lightSources[0] = new Light();
+    	lightSources[0].color = new ColorRGB(0,1,0);
+    	lightSources[0].direction = new Vector3(0.0, 0.0, 0.0);
+    	lightSources[1] = new Light();
+    	lightSources[1].color = new ColorRGB(0,0,1);
+    	lightSources[1].direction = new Vector3(-0.0, 0.0, 0.0);
+    	
+    	lightDir0 = new Vector3(1.0, 0.0, 0.0);
+    	lightDir1 = new Vector3(-1.0, 0.0, 0.0);
 	}
 
 	/* The run() method, required to create a Thread from this class.
@@ -54,13 +69,26 @@ class Graphics3DPanel extends JPanel implements Runnable {
 		g2.setColor(Color.white);
 		g2.fillRect(0, 0, w, h); // Erase before drawing a new frame
 
-		Matrix4 T;
+		Matrix4 T = new Matrix4();
     	T = Matrix4.getTranslateInstance(250.0, 250.0, 0.0);
     	T = T.mult(Matrix4.getScaleInstance(50.0));
-		m.transformVertices(T.mult(Matrix4.getRotateXInstance(2.0 * Math.PI * time)));
+    	
+    	T = T.mult(Matrix4.getRotateZInstance(-0.125 * Math.PI * time));
+    	T = T.mult(Matrix4.getTranslateInstance(2.0, 0, 0));
+    	T = T.mult(Matrix4.getRotateXInstance(0.25 * Math.PI * time));
+		m.transformVertices(T);
 
     	g2.setPaint(Color.black);
-    	m.renderWire(g2);
+    	
+    	T = Matrix4.getRotateZInstance(0.125 * Math.PI * time);
+    	lightSources[0].direction = T.mult(lightDir0);
+    	lightSources[1].direction = T.mult(lightDir1);
+    	
+//    	m.renderWire(g2);
+//    	m.renderWireCulled(g2);
+//    	m.renderFaceCulled(g2);
+//    	m.renderFaceColorCulled(g2);
+    	m.renderFaceShadedCulled(g2, lightSources);
 	}
 
 }
