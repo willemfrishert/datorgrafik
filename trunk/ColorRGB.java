@@ -1,3 +1,5 @@
+import java.awt.Color;
+
 /* ColorRGB.java 1.01 2007-03-16
  * Stefan Gustavson, ITN-LiTH 2007 (stegu@itn.liu.se)
  */
@@ -81,4 +83,15 @@ public class ColorRGB {
     return new ColorRGB(c1.r+c2.r, c1.g+c2.g, c1.b+c2.b);
   }
 
+  public Color getColor()
+  {
+	  return new Color((float)r, (float)g, (float)b);
+  }
+  
+  public void normalizeColor()
+  {
+	  r = Math.max(Math.min(r, 1), 0);
+	  g = Math.max(Math.min(g, 1), 0);
+	  b = Math.max(Math.min(b, 1), 0);
+  }
 }

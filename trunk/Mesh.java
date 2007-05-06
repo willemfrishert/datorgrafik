@@ -75,7 +75,7 @@ public class Mesh {
     // Not yet implemented - suggested extra assignment
   }
   
-  public void calculateFaceColors(){
+  public void calculateFaceRandomColors(){
 	  faceColors = new ColorRGB[triangles.length];
 	  
 	  for (int i=0; i < faceColors.length; i++)
@@ -83,7 +83,16 @@ public class Mesh {
 		  faceColors[i] = new ColorRGB(Math.random(),Math.random(),Math.random());
 	  }
   }
-
+  
+  public void setFaceColor(ColorRGB colorRGB)
+  { 
+	  faceColors = new ColorRGB[triangles.length];
+	  
+	  for (int i=0; i < faceColors.length; i++)
+	  {
+		  faceColors[i] = colorRGB;
+	  }
+  }
 /**
   * Transform <code>vertices</code>, store transformed result in <code>tVertices</code>
   * @param mtx The transformation matrix
@@ -144,22 +153,6 @@ public class Mesh {
 	  
     Vector3 viewDirection = new Vector3(0,0,-1);
     calculateFaceVisibility(viewDirection);
-    
-//    if (faceVisibility == null || faceVisibility.length != triangles.length)
-//      faceVisibility = new boolean[triangles.length];
-//    for (int i=0; i<triangles.length; i++) {
-//      // Determine face visibility from face normal direction
-//    	double angle = Vector3.dot(viewDirection, faceNormals[i]);
-//    	
-//    	if (Math.abs(angle) < 1)
-//    	{
-//    		faceVisibility[i] = true;
-//    	}
-//    	else
-//    	{
-//    		faceVisibility[i] = false;
-//    	}
-//    }
   }
 
 /**
@@ -198,12 +191,11 @@ public class Mesh {
     	Vector3 normal = faceNormals[i];
     	
     	double angle = Vector3.dot(normal, lightsource.direction);
-
-    	double r = faceColors[i].r * lightsource.color.r * angle;
-    	double g = faceColors[i].g * lightsource.color.g * angle;
-    	double b = faceColors[i].b * lightsource.color.b * angle;
     	
-    	lighting[i] = new ColorRGB( r, g, b);
+//    	double r = faceColors[i].r * lightsource.color.r * angle;
+//    	double g = faceColors[i].g * lightsource.color.g * angle;
+//    	double b = faceColors[i].b * lightsource.color.b * angle;  	
+    	lighting[i] = faceColors[i].mult(lightsource.color.mult(angle) );
     }
     return lighting;
   }
@@ -244,8 +236,6 @@ public class Mesh {
   */
   public void renderWireCulled(Graphics2D g2) {
     // Render visible triangles as a wireframe - very similar to renderWire().
-	calculateFaceNormals();
-	calculateFaceVisibility(); 
 	  
     GeneralPath p = new GeneralPath();
     for(int i=0; i<triangles.length; i++) {
@@ -271,9 +261,6 @@ public class Mesh {
   */
   public void renderFaceCulled(Graphics2D g2) {
     // Very similar to renderWireCulled().
-	calculateFaceNormals();
-	calculateFaceVisibility(); 
-
 	GeneralPath p = new GeneralPath();
 	for(int i=0; i<triangles.length; i++) {
 	if(triangles[i] != null) { // Don't try to draw nonexistent triangles
@@ -287,11 +274,11 @@ public class Mesh {
 	  }
 	}
 	
-	Paint paint = g2.getPaint();
+	Paint borderPaint = g2.getPaint();
 	g2.setPaint(Color.blue);
 	g2.fill(p);
 	
-	g2.setPaint(paint);
+	g2.setPaint(borderPaint);
 	g2.draw(p); // Render all triangles in one blow since they are all the same color
   }
 
@@ -305,9 +292,7 @@ public class Mesh {
     // Very similar to the other rendering functions, but now we can have
     // different colors, so we need to render each triangle separately.
     // Very similar to renderWireCulled().
-	calculateFaceNormals();
-	calculateFaceVisibility(); 
-	Paint paint = g2.getPaint();
+	Paint borderPaint = g2.getPaint();
 	
 	for(int i=0; i<triangles.length; i++) {
 	if(triangles[i] != null) { // Don't try to draw nonexistent triangles
@@ -319,10 +304,10 @@ public class Mesh {
 	        p.lineTo((float)tVertices[triangles[i].p3].x,(float)tVertices[triangles[i].p3].y);
 	        p.closePath();
 	        
-	    	g2.setPaint(new Color((float)faceColors[i].r, (float)faceColors[i].g, (float)faceColors[i].b) );
+	    	g2.setPaint( faceColors[i].getColor() );
 	    	g2.fill(p);
 	    	
-	    	g2.setPaint(paint);
+	    	g2.setPaint(borderPaint);
 	    	g2.draw(p); // Render all triangles in one blow since they are all the same color  
 		}
 	  }
@@ -339,40 +324,33 @@ public class Mesh {
   public void renderFaceShadedCulled(Graphics2D g2, Light[] lightSources) {
     // Similar to renderFaceColorCulled(), but the color for each triangle
     // is now dependent on both faceColors and faceLighting.
-	calculateFaceNormals();
-	calculateFaceVisibility();
 
 	// reserve space for final shades
-	ColorRGB totalLightColors[] = new ColorRGB[triangles.length];
-	for(int i=0; i< totalLightColors.length; i++)
+	ColorRGB finalLightColors[] = new ColorRGB[triangles.length];
+	for(int i=0; i< finalLightColors.length; i++)
 	{	
-		totalLightColors[i] = new ColorRGB();
+		finalLightColors[i] = new ColorRGB();
 	}
 	
 	// add shades together
 	for(int i=0; i< lightSources.length; i++)
 	{
-		ColorRGB lightColors[] = calculateFaceLighting(lightSources[i]);
+		ColorRGB individualLightColors[] = calculateFaceLighting(lightSources[i]);
 		
-		for(int j=0; j < lightColors.length; j++)
+		for(int j=0; j < individualLightColors.length; j++)
 		{
-			totalLightColors[j] = totalLightColors[j].add(lightColors[j]);
+			finalLightColors[j] = finalLightColors[j].add(individualLightColors[j]);
+			
 		}
 	}
-	
-	// make sure we don't go overboard with the colors
-	for(int i=0; i< totalLightColors.length; i++)
-	{	
-		totalLightColors[i].r = (totalLightColors[i].r < 1.0) ? totalLightColors[i].r : 1.0;
-		totalLightColors[i].g = (totalLightColors[i].g < 1.0) ? totalLightColors[i].g : 1.0;
-		totalLightColors[i].b = (totalLightColors[i].b < 1.0) ? totalLightColors[i].b : 1.0;
-    	
-		totalLightColors[i].r = (totalLightColors[i].r > 0.0) ? totalLightColors[i].r : 0.0;
-		totalLightColors[i].g = (totalLightColors[i].g > 0.0) ? totalLightColors[i].g : 0.0;
-		totalLightColors[i].b = (totalLightColors[i].b > 0.0) ? totalLightColors[i].b : 0.0;
+
+	for(int j=0; j < finalLightColors.length; j++)
+	{
+		// make sure we don't go overboard with the colors
+		finalLightColors[j].normalizeColor();
 	}
 	
-	Paint paint = g2.getPaint();
+	Paint borderPaint = g2.getPaint();
 	
 	for(int i=0; i<triangles.length; i++) {
 	if(triangles[i] != null) { // Don't try to draw nonexistent triangles
@@ -384,10 +362,10 @@ public class Mesh {
 	        p.lineTo((float)tVertices[triangles[i].p3].x,(float)tVertices[triangles[i].p3].y);
 	        p.closePath();
 	        
-	    	g2.setPaint(new Color((float)totalLightColors[i].r, (float)totalLightColors[i].g, (float)totalLightColors[i].b) );
+	    	g2.setPaint( finalLightColors[i].getColor() );
 	    	g2.fill(p);
 	    	
-	    	g2.setPaint(paint);
+	    	g2.setPaint(borderPaint);
 	    	g2.draw(p); // Render all triangles in one blow since they are all the same color  
 		}
 	  }
