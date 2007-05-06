@@ -58,5 +58,9 @@ public class Vertex4 {
   */
   public void normalizeW() {
     // Normalize the homogeneous coordinates
+	this.x/=this.w;
+	this.y/=this.w;
+	this.z/=this.w;
+	this.w=1.0;
   }
 }

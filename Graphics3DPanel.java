@@ -11,12 +11,15 @@
  */
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.*;
 import java.lang.InterruptedException;
 import javax.swing.JPanel;
 
-class Graphics3DPanel extends JPanel implements Runnable {
 
+
+class Graphics3DPanel extends JPanel implements Runnable, KeyListener {
 	/* Class-wide variable to hold the start time for animation */
 	private long starttime = 0;
 
@@ -31,8 +34,12 @@ class Graphics3DPanel extends JPanel implements Runnable {
 	public Graphics3DPanel() {
   		super(); // Run the parent constructor for JPanel
     	// Create a Mesh to use in the paintComponent() method
-    	m = new Icosahedron();
-    	m.calculateFaceColors();
+    	
+  		m = new Icosahedron();
+//  		m = new Titanic();
+
+    	m.setFaceColor(new ColorRGB(1,1,1));
+//    	m.calculateFaceRandomColors();
     	
     	lightSources[0] = new Light();
     	lightSources[0].color = new ColorRGB(0,1,0);
@@ -59,7 +66,7 @@ class Graphics3DPanel extends JPanel implements Runnable {
 	}
 
 	/* Render the 3D graphics to the window using Java2D for drawing */
-	public void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {		
 		Graphics2D g2 = (Graphics2D)g; // Required to use Java2D
 
 		double time = 0.001 * (System.currentTimeMillis()-starttime);
@@ -73,8 +80,8 @@ class Graphics3DPanel extends JPanel implements Runnable {
     	T = Matrix4.getTranslateInstance(250.0, 250.0, 0.0);
     	T = T.mult(Matrix4.getScaleInstance(50.0));
     	
-    	T = T.mult(Matrix4.getRotateZInstance(-0.125 * Math.PI * time));
-    	T = T.mult(Matrix4.getTranslateInstance(2.0, 0, 0));
+//    	T = T.mult(Matrix4.getRotateZInstance(-0.125 * Math.PI * time));
+//    	T = T.mult(Matrix4.getTranslateInstance(2.0, 0, 0));
     	T = T.mult(Matrix4.getRotateXInstance(0.25 * Math.PI * time));
 		m.transformVertices(T);
 
@@ -84,11 +91,29 @@ class Graphics3DPanel extends JPanel implements Runnable {
     	lightSources[0].direction = T.mult(lightDir0);
     	lightSources[1].direction = T.mult(lightDir1);
     	
+		m.calculateFaceNormals();
+		m.calculateFaceVisibility();     	
+    	
 //    	m.renderWire(g2);
 //    	m.renderWireCulled(g2);
 //    	m.renderFaceCulled(g2);
 //    	m.renderFaceColorCulled(g2);
     	m.renderFaceShadedCulled(g2, lightSources);
+	}
+
+	public void keyPressed(KeyEvent arg0) {
+		
+		
+	}
+
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

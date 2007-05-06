@@ -23,6 +23,7 @@ public class Graphics3DMain {
 		panel.setPreferredSize(new Dimension(500,500));
 		mainFrame.add(panel);
 		mainFrame.pack();
+		panel.addKeyListener( panel );
 
 		// Create and start the animation thread
 		Thread animationThread = new Thread(panel);
